@@ -1,61 +1,31 @@
-import url from 'url'
-import React from 'react'
-import Head from 'next/head'
-import Link from 'next/link'
-import Router from 'next/router'
-import axios from 'axios'
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
+import Link from 'next/link';
+import Router from 'next/router';
+import API from '../utils/API';
 
-import Layout from '../components/Layout.js'
+const App = props => {
+  const [fruit, setFruit] = useState('Banana');
+  //Due to SSR we cannot access the window property so we are going to store it in state
+  useEffect(() => {
+    console.log(window.location);
+  }, {});
 
-const absoluteUrl = (req, setLocalhost) => {
-    let protocol = 'https'
-    let host = req ? req.headers.host : window.location.hostname
-    if (host.indexOf('localhost') > -1) {
-        if (setLocalhost) host = setLocalhost
-        protocol = 'http'
-    }
+  return (
+    <div>
+      {console.log(props)}
+      <Head>
+        <title>Albion Tools</title>
+      </Head>
+      <button onClick={() => setFruit('Banana')}>Banana</button>
+      <button onClick={() => setFruit('Orange')}>Orange</button>
+      <p>{fruit}</p>
+    </div>
+  );
+};
 
-    return url.format({
-        protocol,
-        host,
-        pathname: '/' // req.url
-    })
-}
+App.getInitialProps = async context => {
+  return API.getMe(context);
+};
 
-export default class extends React.Component {
-
-
-
-    static async getInitialProps(context) {
-        /* NOTE - relative url in this function runs will not work and 
-        will get ECONNRESET error since it runs on server context */
-        const baseUrl = absoluteUrl(context.req, 'localhost:3000')
-        const apiUrl = process.env.NODE_ENV === 'production' ? `${baseUrl}api/me` : 'http://localhost:9999/api/me'
-        try {
-            const { status, data } = await axios.get(apiUrl)
-            return { user: data.user }
-        }
-        catch (ex) {
-            console.log(`Error fetching data from ${apiUrl} - ${ex.message}`)
-            return { user: null }
-        }
-    }
-
-    render() {
-        return (
-            <Layout>
-                <h1>NextJS + Express in Now v2</h1>
-                {this.props.user &&
-                    <div>
-                        <h2>Data from API</h2>
-                        <p>FirstName : {this.props.user.firstname}</p>
-                        <p>LastName : {this.props.user.lastname}</p>
-                    </div>
-                }
-            </Layout>
-        )
-    }
-}
-
-
-
+export default App;

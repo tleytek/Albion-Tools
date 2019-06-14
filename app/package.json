@@ -9,5 +9,10 @@
   },
   "scripts": {
     "start": "node server-dev.js"
-  }
+  },
+  "main": "server-dev.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "description": ""
 }
